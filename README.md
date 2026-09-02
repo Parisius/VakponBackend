@@ -61,6 +61,23 @@ Fill in `.env`:
 - `CLIENT_URL` — the deployed Espace Client URL, linked to from customer emails
 - `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` — your first admin login
 
+## Deployment topology
+
+This API is meant to live on its own subdomain, `api.vakpon-tours.com`, while
+`site/`, `admin/`, and `espace-client/` (from the
+[VakponApp](https://github.com/Parisius/VakponApp) repo) are deployed as
+**subpaths of the same domain** — e.g. on cPanel, upload `site/`'s contents
+directly into `public_html/`, and `admin/` and `espace-client/` as
+subdirectories of `public_html/`, so:
+
+- `https://vakpon-tours.com/` → the landing site
+- `https://vakpon-tours.com/admin/index.html` → the back-office
+- `https://vakpon-tours.com/espace-client/index.html` → the customer portal
+
+Because all three are one origin, production `CORS_ORIGIN` is just
+`https://vakpon-tours.com` — a single value, unlike local dev's three ports.
+`CLIENT_URL` becomes `https://vakpon-tours.com/espace-client/index.html`.
+
 ```bash
 npm run build
 npm run seed:admin
