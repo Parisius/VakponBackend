@@ -63,12 +63,11 @@ Fill in `.env`:
 
 ## Deployment topology
 
-This API is meant to live on its own subdomain, `api.vakpon-tours.com`, while
-`site/`, `admin/`, and `espace-client/` (from the
-[VakponApp](https://github.com/Parisius/VakponApp) repo) are deployed as
-**subpaths of the same domain** — e.g. on cPanel, upload `site/`'s contents
-directly into `public_html/`, and `admin/` and `espace-client/` as
-subdirectories of `public_html/`, so:
+The domain (`vakpon-tours.com`) stays on cPanel for DNS + mail (MX records
+untouched) — all app hosting lives on a VPS instead. This API runs on its own
+subdomain, `api.vakpon-tours.com`, while `site/`, `admin/`, and
+`espace-client/` (from the [VakponApp](https://github.com/Parisius/VakponApp)
+repo) are deployed as **subpaths of the root domain**, on the same VPS:
 
 - `https://vakpon-tours.com/` → the landing site
 - `https://vakpon-tours.com/admin/index.html` → the back-office
@@ -77,6 +76,12 @@ subdirectories of `public_html/`, so:
 Because all three are one origin, production `CORS_ORIGIN` is just
 `https://vakpon-tours.com` — a single value, unlike local dev's three ports.
 `CLIENT_URL` becomes `https://vakpon-tours.com/espace-client/index.html`.
+
+`deploy/nginx-api.conf` reverse-proxies `api.vakpon-tours.com` to the `api`
+container, which `docker-compose.yml` binds to `127.0.0.1:3001` only — it
+must never be reachable directly from the public internet. See
+[VakponApp's `deploy/`](https://github.com/Parisius/VakponApp/tree/main/deploy)
+for the matching frontend Nginx config.
 
 ```bash
 npm run build

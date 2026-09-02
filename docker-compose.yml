@@ -4,7 +4,9 @@ services:
     container_name: vakpon-mongo
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      # Bound to localhost only — Mongo must never face the public internet
+      # directly. On the VPS this is still reachable via an SSH tunnel.
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo-data:/data/db
 
@@ -22,10 +24,15 @@ services:
       # Mongo by service name, not localhost.
       MONGODB_URI: mongodb://mongo:27017/vakpon-tours
     ports:
-      - "3001:3000"
+      # Bound to localhost only — Nginx reverse-proxies api.vakpon-tours.com
+      # to this port; the raw API must never be reachable directly.
+      - "127.0.0.1:3001:3000"
 
-  # Optional: a lightweight web UI to browse the database during development.
-  # Remove this service for production deployments.
+  # Dev-convenience DB viewer. Bound to localhost only — on the VPS, reach it
+  # via an SSH tunnel (ssh -L 8081:localhost:8081 you@vps) rather than exposing
+  # it publicly. Change the default admin/admin login before relying on this
+  # in production, or just stop this service (docker compose stop mongo-express)
+  # when you're not actively using it.
   mongo-express:
     image: mongo-express:1
     container_name: vakpon-mongo-express
@@ -37,7 +44,7 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
 
 volumes:
   mongo-data:
