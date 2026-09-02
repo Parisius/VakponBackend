@@ -24,9 +24,16 @@ services:
       # Mongo by service name, not localhost.
       MONGODB_URI: mongodb://mongo:27017/vakpon-tours
     ports:
-      # Bound to localhost only — Nginx reverse-proxies api.vakpon-tours.com
-      # to this port; the raw API must never be reachable directly.
-      - "127.0.0.1:3001:3000"
+      # Published on all interfaces — if your reverse proxy (e.g. Nginx Proxy
+      # Manager) runs in its own container rather than sharing a Docker
+      # network with this stack, it can only reach this port via the VPS's
+      # real IP, not 127.0.0.1 (that's the proxy container's own loopback).
+      # The API requires JWT auth on everything except GET /offers,
+      # POST /reservations/public, and POST /auth/login|register, so direct
+      # exposure is a much smaller risk than it looks — but if you'd rather
+      # close it off entirely, join this stack to your proxy's Docker network
+      # instead and drop this ports mapping (see backend/README.md).
+      - "3001:3000"
 
   # Dev-convenience DB viewer. Bound to localhost only — on the VPS, reach it
   # via an SSH tunnel (ssh -L 8081:localhost:8081 you@vps) rather than exposing

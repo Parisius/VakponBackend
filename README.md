@@ -77,11 +77,35 @@ Because all three are one origin, production `CORS_ORIGIN` is just
 `https://vakpon-tours.com` — a single value, unlike local dev's three ports.
 `CLIENT_URL` becomes `https://vakpon-tours.com/espace-client/index.html`.
 
-`deploy/nginx-api.conf` reverse-proxies `api.vakpon-tours.com` to the `api`
-container, which `docker-compose.yml` binds to `127.0.0.1:3001` only — it
-must never be reachable directly from the public internet. See
-[VakponApp's `deploy/`](https://github.com/Parisius/VakponApp/tree/main/deploy)
-for the matching frontend Nginx config.
+### Option A — plain Nginx
+
+`deploy/nginx-api.conf` reverse-proxies `api.vakpon-tours.com` to
+`127.0.0.1:3001`, where `docker-compose.yml` publishes the `api` container.
+
+### Option B — Nginx Proxy Manager (or any reverse proxy in its own container)
+
+`docker-compose.yml` publishes the API on all interfaces (`3001:3000`)
+specifically so a reverse proxy running as a *separate container* — NPM
+included — can reach it via the VPS's real IP. `127.0.0.1` wouldn't work
+there: inside NPM's own container, `localhost` means NPM itself, not this
+stack.
+
+In NPM, **Add Proxy Host**:
+- Domain Names: `api.vakpon-tours.com`
+- Forward Hostname/IP: your VPS's real IP
+- Forward Port: `3001`
+- SSL tab: request a new Let's Encrypt certificate, enable **Force SSL**
+
+The API requires JWT auth on everything except `GET /offers`,
+`POST /reservations/public`, and `POST /auth/login|register`, so this port
+being reachable directly (not just via the domain) is a much smaller risk
+than it looks. To close it off entirely instead, join this stack to your
+proxy's Docker network and drop the `ports:` mapping under `api` — then NPM
+forwards to the container's service name (`api`) and port `3000` instead of
+an IP.
+
+See [VakponApp's `deploy/`](https://github.com/Parisius/VakponApp/tree/main/deploy)
+and its `Dockerfile`/`docker-compose.yml` for the matching frontend setup.
 
 ```bash
 npm run build
