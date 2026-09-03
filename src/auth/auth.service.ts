@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, ForgotPasswordDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -45,6 +45,12 @@ export class AuthService {
     const valid = await this.usersService.validatePassword(user, dto.currentPassword);
     if (!valid) throw new UnauthorizedException('Mot de passe actuel incorrect');
     await this.usersService.setPassword(userId, dto.newPassword);
+    return { success: true };
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto) {
+    await this.usersService.forgotPassword(dto.email);
+    // Always the same response, whether or not the email exists — avoids leaking account existence.
     return { success: true };
   }
 }

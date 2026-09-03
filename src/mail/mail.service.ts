@@ -116,6 +116,18 @@ export class MailService {
     );
   }
 
+  async sendPasswordReset(to: string, fullName: string, tempPassword: string) {
+    await this.send(
+      to,
+      'Réinitialisation de votre mot de passe — Vakpon Tours',
+      `<p>Bonjour ${fullName},</p>
+       <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+       <p><b>Email :</b> ${to}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
+       <p>Connectez-vous avec ce mot de passe temporaire — vous serez invité(e) à en choisir un nouveau. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email.</p>
+       <p>— L'équipe Vakpon Tours</p>`,
+    );
+  }
+
   async sendAdminInvite(to: string, fullName: string, tempPassword: string) {
     await this.send(
       to,

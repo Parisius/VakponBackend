@@ -57,6 +57,22 @@ export class UsersService {
     return bcrypt.compare(password, user.passwordHash);
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.findByEmail(email);
+    if (!user) return; // silent — don't leak whether an account exists
+
+    const tempPassword = generateTempPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+    await this.userModel.findByIdAndUpdate(user._id, { passwordHash, mustChangePassword: true });
+
+    await this.mailService.sendPasswordReset(user.email, user.fullName, tempPassword);
+    await this.auditLogService.log(
+      { email: user.email, role: user.role },
+      'password.forgot',
+      'Mot de passe oublié — mot de passe temporaire envoyé par email',
+    );
+  }
+
   async setPassword(userId: string, newPassword: string) {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     const user = await this.userModel.findByIdAndUpdate(userId, {
