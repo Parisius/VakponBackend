@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { UpdateProfileDto, UpdateCrmDto, CreateAdminDto } from './dto/user.dto';
+import { UpdateProfileDto, UpdateCrmDto, CreateAdminDto, UpdateAdminDto } from './dto/user.dto';
 import { CUSTOMERS_ROLES, TEAM_ROLES } from '../common/roles';
 
 @Controller()
@@ -73,6 +73,13 @@ export class UsersController {
   @Post('admin/team')
   createTeamMember(@CurrentUser() actor: any, @Body() dto: CreateAdminDto) {
     return this.usersService.createAdmin(actor, dto.fullName, dto.email, dto.role);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(...TEAM_ROLES)
+  @Patch('admin/team/:id')
+  updateTeamMember(@CurrentUser() actor: any, @Param('id') id: string, @Body() dto: UpdateAdminDto) {
+    return this.usersService.updateAdmin(actor, id, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

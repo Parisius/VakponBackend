@@ -31,3 +31,17 @@ export class CreateAdminDto {
   @IsIn(STAFF_ROLES)
   role: (typeof STAFF_ROLES)[number];
 }
+
+export class UpdateAdminDto {
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsIn(STAFF_ROLES)
+  role?: (typeof STAFF_ROLES)[number];
+}

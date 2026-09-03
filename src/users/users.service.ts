@@ -97,6 +97,40 @@ export class UsersService {
     return { user: safe, tempPassword };
   }
 
+  async updateAdmin(actor: CurrentUserCtx, id: string, data: { fullName?: string; email?: string; role?: string }) {
+    const target = await this.userModel.findOne({ _id: id, role: { $in: STAFF_ROLES } });
+    if (!target) throw new NotFoundException('Membre introuvable');
+
+    if (data.email) {
+      const normalized = data.email.toLowerCase().trim();
+      if (normalized !== target.email) {
+        const existing = await this.findByEmail(normalized);
+        if (existing) throw new BadRequestException('Un compte existe déjà avec cet email');
+      }
+    }
+
+    if (data.role && data.role !== target.role) {
+      const wasManager = TEAM_ROLES.includes(target.role as any);
+      const staysManager = TEAM_ROLES.includes(data.role as any);
+      if (wasManager && !staysManager) {
+        const managersLeft = await this.userModel.countDocuments({ role: { $in: TEAM_ROLES } });
+        if (managersLeft <= 1) {
+          throw new BadRequestException("Impossible de retirer le dernier compte pouvant gérer l'équipe");
+        }
+      }
+    }
+
+    const update: any = {};
+    if (data.fullName) update.fullName = data.fullName;
+    if (data.email) update.email = data.email.toLowerCase().trim();
+    if (data.role) update.role = data.role;
+
+    const user = await this.userModel.findByIdAndUpdate(id, update, { new: true }).select('-passwordHash');
+    if (!user) throw new NotFoundException('Membre introuvable');
+    await this.auditLogService.log(actor, 'member.update', `${user.fullName} (${ROLE_LABELS[user.role] || user.role})`);
+    return user;
+  }
+
   async removeAdmin(actor: CurrentUserCtx, id: string) {
     if (id === actor.userId) {
       throw new ForbiddenException('Vous ne pouvez pas retirer votre propre compte');

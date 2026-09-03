@@ -1,4 +1,5 @@
 import { IsArray, IsBoolean, IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 
 class PriceTierDto {
   @IsString()
@@ -64,4 +65,4 @@ export class CreateOfferDto {
   sortOrder?: number;
 }
 
-export class UpdateOfferDto extends CreateOfferDto {}
+export class UpdateOfferDto extends PartialType(CreateOfferDto) {}
