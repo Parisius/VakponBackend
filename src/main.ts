@@ -7,6 +7,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
+  // Behind Nginx/NPM in every deployment topology — needed so req.ip reflects
+  // the real visitor IP (via X-Forwarded-For) instead of the proxy's own.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Vakpon Tours API')

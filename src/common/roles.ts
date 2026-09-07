@@ -23,6 +23,7 @@ export const CUSTOMERS_ROLES = ['admin', 'operations', 'service_client', 'suppor
 
 // Marketing: offers + landing content only.
 export const OFFERS_ROLES = ['admin', 'operations', 'marketing'] as const;
+export const ANALYTICS_ROLES = ['admin', 'operations', 'marketing'] as const;
 
 export function isStaffRole(role: string): boolean {
   return (STAFF_ROLES as readonly string[]).includes(role);
