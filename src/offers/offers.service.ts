@@ -28,8 +28,16 @@ export class OffersService {
     return offer;
   }
 
+  // Only one offer can drive the hero section at a time.
+  private async clearOtherHeroes(exceptId?: string) {
+    const filter: any = { isHero: true };
+    if (exceptId) filter._id = { $ne: exceptId };
+    await this.offerModel.updateMany(filter, { isHero: false });
+  }
+
   async create(actor: { email: string; role: string }, dto: CreateOfferDto) {
     const offer = await this.offerModel.create(dto);
+    if (offer.isHero) await this.clearOtherHeroes(offer._id.toString());
     await this.auditLogService.log(actor, 'offer.create', offer.title);
     return offer;
   }
@@ -37,6 +45,7 @@ export class OffersService {
   async update(actor: { email: string; role: string }, id: string, dto: UpdateOfferDto) {
     const offer = await this.offerModel.findByIdAndUpdate(id, dto, { new: true });
     if (!offer) throw new NotFoundException('Offre introuvable');
+    if (dto.isHero) await this.clearOtherHeroes(id);
     await this.auditLogService.log(actor, 'offer.update', offer.title);
     return offer;
   }

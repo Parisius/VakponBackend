@@ -33,6 +33,13 @@ export class User extends Document {
   @Prop({ default: false })
   mustChangePassword: boolean;
 
+  // --- OTP for staff login 2FA (never set for customers) ---
+  @Prop()
+  otpCodeHash: string;
+
+  @Prop()
+  otpExpiresAt: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }

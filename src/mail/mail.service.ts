@@ -128,6 +128,18 @@ export class MailService {
     );
   }
 
+  async sendOtpCode(to: string, fullName: string, code: string) {
+    await this.send(
+      to,
+      `Votre code de connexion : ${code} — Vakpon Tours`,
+      `<p>Bonjour ${fullName},</p>
+       <p>Voici votre code de vérification pour accéder au back-office Vakpon Tours :</p>
+       <p style="font-size:32px;font-weight:bold;letter-spacing:6px;margin:20px 0;">${code}</p>
+       <p>Ce code expire dans 10 minutes. Si vous n'êtes pas à l'origine de cette tentative de connexion, changez votre mot de passe dès que possible.</p>
+       <p>— L'équipe Vakpon Tours</p>`,
+    );
+  }
+
   async sendAdminInvite(to: string, fullName: string, tempPassword: string) {
     await this.send(
       to,

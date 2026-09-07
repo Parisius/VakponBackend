@@ -70,7 +70,7 @@ subdomain, `api.vakpon-tours.com`, while `site/`, `admin/`, and
 repo) are deployed as **subpaths of the root domain**, on the same VPS:
 
 - `https://vakpon-tours.com/` → the landing site
-- `https://vakpon-tours.com/admin/index.html` → the back-office
+- `https://vakpon-tours.com/management/index.html` → the back-office (published from the `admin/` folder — see VakponApp's `Dockerfile`)
 - `https://vakpon-tours.com/espace-client/index.html` → the customer portal
 
 Because all three are one origin, production `CORS_ORIGIN` is just

@@ -73,6 +73,21 @@ export class UsersService {
     );
   }
 
+  // --- OTP (staff login 2FA) ---
+  async setOtp(userId: string, code: string, expiresAt: Date) {
+    const otpCodeHash = await bcrypt.hash(code, 10);
+    await this.userModel.findByIdAndUpdate(userId, { otpCodeHash, otpExpiresAt: expiresAt });
+  }
+
+  async verifyAndConsumeOtp(user: User, code: string): Promise<boolean> {
+    if (!user.otpCodeHash || !user.otpExpiresAt) return false;
+    if (user.otpExpiresAt.getTime() < Date.now()) return false;
+    const valid = await bcrypt.compare(code, user.otpCodeHash);
+    if (!valid) return false;
+    await this.userModel.findByIdAndUpdate(user._id, { $unset: { otpCodeHash: '', otpExpiresAt: '' } });
+    return true;
+  }
+
   async setPassword(userId: string, newPassword: string) {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     const user = await this.userModel.findByIdAndUpdate(userId, {

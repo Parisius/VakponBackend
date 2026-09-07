@@ -1,13 +1,19 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { randomInt } from 'crypto';
 import { UsersService } from '../users/users.service';
-import { RegisterDto, LoginDto, ChangePasswordDto, ForgotPasswordDto } from './dto/auth.dto';
+import { MailService } from '../mail/mail.service';
+import { isStaffRole } from '../common/roles';
+import { RegisterDto, LoginDto, ChangePasswordDto, ForgotPasswordDto, VerifyOtpDto } from './dto/auth.dto';
+
+const OTP_TTL_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   private buildToken(user: any) {
@@ -36,6 +42,24 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Identifiants invalides');
     const valid = await this.usersService.validatePassword(user, dto.password);
     if (!valid) throw new UnauthorizedException('Identifiants invalides');
+
+    // Staff accounts (back-office) require a second factor — an OTP emailed on
+    // each login. Customers (espace client) are unaffected.
+    if (isStaffRole(user.role)) {
+      const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+      await this.usersService.setOtp(user._id.toString(), code, new Date(Date.now() + OTP_TTL_MS));
+      await this.mailService.sendOtpCode(user.email, user.fullName, code);
+      return { otpRequired: true, email: user.email };
+    }
+
+    return this.buildToken(user);
+  }
+
+  async verifyOtp(dto: VerifyOtpDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException('Code invalide ou expiré');
+    const valid = await this.usersService.verifyAndConsumeOtp(user, dto.code);
+    if (!valid) throw new UnauthorizedException('Code invalide ou expiré');
     return this.buildToken(user);
   }
 
