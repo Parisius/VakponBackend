@@ -6,8 +6,11 @@ export class PriceTier {
   @Prop({ required: true })
   label: string;
 
+  @Prop()
+  labelEn: string;
+
   @Prop({ required: true })
-  amount: string; // kept as display string, e.g. "2 232€"
+  amount: string; // kept as display string, e.g. "2 232€" — not translated (a price)
 }
 export const PriceTierSchema = SchemaFactory.createForClass(PriceTier);
 
@@ -15,6 +18,9 @@ export const PriceTierSchema = SchemaFactory.createForClass(PriceTier);
 export class PricingBreakdownRow {
   @Prop({ required: true })
   label: string;
+
+  @Prop()
+  labelEn: string;
 
   @Prop({ required: true })
   amount: string;
@@ -29,11 +35,20 @@ export class ItineraryDay {
   @Prop({ required: true })
   dateLabel: string; // e.g. "1er oct. - Arrivée"
 
+  @Prop()
+  dateLabelEn: string;
+
   @Prop({ required: true })
   title: string;
 
   @Prop()
+  titleEn: string;
+
+  @Prop()
   description: string;
+
+  @Prop()
+  descriptionEn: string;
 }
 export const ItineraryDaySchema = SchemaFactory.createForClass(ItineraryDay);
 
@@ -42,6 +57,9 @@ export class Offer extends Document {
   @Prop({ required: true })
   title: string;
 
+  @Prop()
+  titleEn: string;
+
   @Prop({ required: true, unique: true })
   slug: string;
 
@@ -49,10 +67,19 @@ export class Offer extends Document {
   quote: string;
 
   @Prop()
+  quoteEn: string;
+
+  @Prop()
   description: string;
+
+  @Prop()
+  descriptionEn: string;
 
   @Prop({ type: [String], default: [] })
   includedItems: string[];
+
+  @Prop({ type: [String], default: [] })
+  includedItemsEn: string[];
 
   @Prop({ type: [PriceTierSchema], default: [] })
   priceTiers: PriceTier[];
@@ -61,7 +88,13 @@ export class Offer extends Document {
   durationLabel: string; // e.g. "7 jours · 6 nuits"
 
   @Prop()
+  durationLabelEn: string;
+
+  @Prop()
   routeLabel: string; // e.g. "Cotonou · Ganvié · Ouidah · Porto-Novo"
+
+  @Prop()
+  routeLabelEn: string;
 
   @Prop({ type: [String], default: [] })
   images: string[]; // URLs, e.g. "/images/route-des-captifs.jpg"
@@ -83,7 +116,7 @@ export class Offer extends Document {
   @Prop({ default: 0 })
   sortOrder: number;
 
-  // --- Hero section + its detail modal on the landing page (at most one offer at a time) ---
+  // --- Hero section + its detail modal on the landing page ---
   @Prop({ default: false })
   isHero: boolean;
 
@@ -91,19 +124,37 @@ export class Offer extends Document {
   heroWelcomeText: string; // small eyebrow above the headline, e.g. "Offre Spéciale : Places Limitées"
 
   @Prop()
+  heroWelcomeTextEn: string;
+
+  @Prop()
   heroHeadline: string; // big headline; newlines become <br> when rendered
+
+  @Prop()
+  heroHeadlineEn: string;
 
   @Prop()
   heroPinTitle: string; // location chip title, e.g. "Route des Esclaves"
 
   @Prop()
+  heroPinTitleEn: string;
+
+  @Prop()
   heroPinSub: string; // location chip subtitle, e.g. "Ouidah"
+
+  @Prop()
+  heroPinSubEn: string;
 
   @Prop()
   modalHeading: string; // e.g. "Pack Séjour Bénin 7 jours / 6 nuits"
 
   @Prop()
+  modalHeadingEn: string;
+
+  @Prop()
   modalDatesLabel: string; // free-text dates line, e.g. "Du 1er au 7 octobre 2026"
+
+  @Prop()
+  modalDatesLabelEn: string;
 
   @Prop({ type: [PricingBreakdownRowSchema], default: [] })
   modalPricingBreakdown: PricingBreakdownRow[]; // "Prix normal / Prix groupe / Économie réalisée" rows
@@ -113,6 +164,9 @@ export class Offer extends Document {
 
   @Prop()
   modalNote: string; // closing note in the modal
+
+  @Prop()
+  modalNoteEn: string;
 
   createdAt: Date;
   updatedAt: Date;

@@ -5,6 +5,10 @@ class PriceTierDto {
   @IsString()
   label: string;
 
+  @IsOptional()
+  @IsString()
+  labelEn?: string;
+
   @IsString()
   amount: string;
 }
@@ -12,6 +16,10 @@ class PriceTierDto {
 class PricingBreakdownRowDto {
   @IsString()
   label: string;
+
+  @IsOptional()
+  @IsString()
+  labelEn?: string;
 
   @IsString()
   amount: string;
@@ -25,17 +33,33 @@ class ItineraryDayDto {
   @IsString()
   dateLabel: string;
 
+  @IsOptional()
+  @IsString()
+  dateLabelEn?: string;
+
   @IsString()
   title: string;
 
   @IsOptional()
   @IsString()
+  titleEn?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  descriptionEn?: string;
 }
 
 export class CreateOfferDto {
   @IsString()
   title: string;
+
+  @IsOptional()
+  @IsString()
+  titleEn?: string;
 
   @IsString()
   slug: string;
@@ -46,11 +70,23 @@ export class CreateOfferDto {
 
   @IsOptional()
   @IsString()
+  quoteEn?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  descriptionEn?: string;
 
   @IsOptional()
   @IsArray()
   includedItems?: string[];
+
+  @IsOptional()
+  @IsArray()
+  includedItemsEn?: string[];
 
   @IsOptional()
   @IsArray()
@@ -62,7 +98,15 @@ export class CreateOfferDto {
 
   @IsOptional()
   @IsString()
+  durationLabelEn?: string;
+
+  @IsOptional()
+  @IsString()
   routeLabel?: string;
+
+  @IsOptional()
+  @IsString()
+  routeLabelEn?: string;
 
   @IsOptional()
   @IsArray()
@@ -98,7 +142,15 @@ export class CreateOfferDto {
 
   @IsOptional()
   @IsString()
+  heroWelcomeTextEn?: string;
+
+  @IsOptional()
+  @IsString()
   heroHeadline?: string;
+
+  @IsOptional()
+  @IsString()
+  heroHeadlineEn?: string;
 
   @IsOptional()
   @IsString()
@@ -106,7 +158,15 @@ export class CreateOfferDto {
 
   @IsOptional()
   @IsString()
+  heroPinTitleEn?: string;
+
+  @IsOptional()
+  @IsString()
   heroPinSub?: string;
+
+  @IsOptional()
+  @IsString()
+  heroPinSubEn?: string;
 
   @IsOptional()
   @IsString()
@@ -114,7 +174,15 @@ export class CreateOfferDto {
 
   @IsOptional()
   @IsString()
+  modalHeadingEn?: string;
+
+  @IsOptional()
+  @IsString()
   modalDatesLabel?: string;
+
+  @IsOptional()
+  @IsString()
+  modalDatesLabelEn?: string;
 
   @IsOptional()
   @IsArray()
@@ -127,6 +195,10 @@ export class CreateOfferDto {
   @IsOptional()
   @IsString()
   modalNote?: string;
+
+  @IsOptional()
+  @IsString()
+  modalNoteEn?: string;
 }
 
 export class UpdateOfferDto extends PartialType(CreateOfferDto) {}
