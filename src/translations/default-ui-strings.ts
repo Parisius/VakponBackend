@@ -11,6 +11,7 @@ export const DEFAULT_UI_STRINGS: { key: string; fr: string; en: string }[] = [
   { key: 'nav.about', fr: 'À propos', en: 'About' },
   { key: 'nav.offers', fr: 'Nos Offres', en: 'Our Offers' },
   { key: 'nav.heritage', fr: 'Notre Patrimoine', en: 'Our Heritage' },
+  { key: 'nav.travelGuide', fr: 'Guide du voyageur', en: "Traveler's Guide" },
   { key: 'nav.espaceClient', fr: 'Espace Client', en: 'Client Area' },
   { key: 'nav.contact', fr: 'Contact', en: 'Contact' },
   { key: 'header.contactBtn', fr: 'Nous Contacter', en: 'Contact Us' },
@@ -37,6 +38,8 @@ export const DEFAULT_UI_STRINGS: { key: string; fr: string; en: string }[] = [
 
   // Vision section
   { key: 'vision.eyebrow', fr: '<span class="accent-word">Notre</span> Vision', en: '<span class="accent-word">Our</span> Vision' },
+  { key: 'guide.eyebrow', fr: 'Espace info', en: 'Info hub' },
+  { key: 'apropos.eyebrow', fr: 'Notre histoire', en: 'Our story' },
   { key: 'vision.heading', fr: "L'Afrique de l'Ouest commence ici.", en: 'West Africa starts here.' },
   {
     key: 'vision.paragraph',

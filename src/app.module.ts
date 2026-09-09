@@ -11,6 +11,7 @@ import { MailModule } from './mail/mail.module';
 import { AuditModule } from './audit/audit.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { TranslationsModule } from './translations/translations.module';
+import { PagesModule } from './pages/pages.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TranslationsModule } from './translations/translations.module';
     MailModule,
     AnalyticsModule,
     TranslationsModule,
+    PagesModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
