@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Header, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { AnalyticsService, AnalyticsRange } from './analytics.service';
 import { CollectDto } from './dto/collect.dto';
@@ -28,6 +29,7 @@ export class AnalyticsController {
 
   // Public — fired once per pageview. Returns the record id so the client can
   // later report a durationMs for it (see /analytics/duration).
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Post('analytics/collect')
   async collect(@Body() dto: CollectDto, @Req() req: Request) {
     const doc = await this.analyticsService.collect(dto, this.extractIp(req), req.headers['user-agent'] || '');

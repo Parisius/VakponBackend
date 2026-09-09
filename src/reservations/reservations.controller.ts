@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ReservationsService } from './reservations.service';
 import {
   AddMessageDto,
@@ -18,6 +19,7 @@ export class ReservationsController {
   constructor(private reservationsService: ReservationsService) {}
 
   // Public — the landing page's reservation form posts here, no login needed
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('reservations/public')
   createPublic(@Body() dto: CreatePublicReservationDto) {
     return this.reservationsService.createPublic(dto);

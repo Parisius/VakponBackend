@@ -12,6 +12,9 @@ function generateTempPassword() {
   return randomBytes(9).toString('base64url');
 }
 
+export const OTP_MAX_ATTEMPTS = 2;
+export const OTP_LOCKOUT_MS = 3 * 60 * 60 * 1000; // 3 hours
+
 export interface CurrentUserCtx {
   userId: string;
   email: string;
@@ -79,13 +82,43 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, { otpCodeHash, otpExpiresAt: expiresAt });
   }
 
+  // 2 wrong codes locks both further verify attempts AND new OTP requests
+  // for 3 hours — checked here and again before a fresh code is ever sent
+  // (see AuthService.login/verifyOtp).
+  getOtpLockStatus(user: User): { blocked: boolean; retryAt?: Date } {
+    if (user.otpBlockedUntil && user.otpBlockedUntil.getTime() > Date.now()) {
+      return { blocked: true, retryAt: user.otpBlockedUntil };
+    }
+    return { blocked: false };
+  }
+
   async verifyAndConsumeOtp(user: User, code: string): Promise<boolean> {
     if (!user.otpCodeHash || !user.otpExpiresAt) return false;
     if (user.otpExpiresAt.getTime() < Date.now()) return false;
     const valid = await bcrypt.compare(code, user.otpCodeHash);
-    if (!valid) return false;
-    await this.userModel.findByIdAndUpdate(user._id, { $unset: { otpCodeHash: '', otpExpiresAt: '' } });
+    if (!valid) {
+      await this.registerFailedOtpAttempt(user);
+      return false;
+    }
+    await this.userModel.findByIdAndUpdate(user._id, {
+      $unset: { otpCodeHash: '', otpExpiresAt: '' },
+      $set: { otpFailedAttempts: 0 },
+    });
     return true;
+  }
+
+  private async registerFailedOtpAttempt(user: User) {
+    const attempts = (user.otpFailedAttempts || 0) + 1;
+    if (attempts >= OTP_MAX_ATTEMPTS) {
+      // Lock the account and invalidate the current code — the reset
+      // attempts count means the next window starts fresh after the lockout.
+      await this.userModel.findByIdAndUpdate(user._id, {
+        $set: { otpFailedAttempts: 0, otpBlockedUntil: new Date(Date.now() + OTP_LOCKOUT_MS) },
+        $unset: { otpCodeHash: '', otpExpiresAt: '' },
+      });
+    } else {
+      await this.userModel.findByIdAndUpdate(user._id, { $set: { otpFailedAttempts: attempts } });
+    }
   }
 
   async setPassword(userId: string, newPassword: string) {

@@ -40,6 +40,14 @@ export class User extends Document {
   @Prop()
   otpExpiresAt: Date;
 
+  // Brute-force protection: 2 wrong codes locks new attempts/new codes for
+  // 3 hours (see OTP_MAX_ATTEMPTS/OTP_LOCKOUT_MS in users.service.ts).
+  @Prop({ default: 0 })
+  otpFailedAttempts: number;
+
+  @Prop()
+  otpBlockedUntil: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }
