@@ -1,10 +1,24 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as sanitizeHtml from 'sanitize-html';
 import { UiString } from './ui-string.schema';
 import { UpsertUiStringDto } from './dto/upsert-ui-string.dto';
 import { AuditLogService } from '../audit/audit-log.service';
 import { DEFAULT_UI_STRINGS } from './default-ui-strings';
+
+// A handful of these strings are rendered with innerHTML on the public site
+// (data-i18n-html — small bits of formatting like a bold word or a footer
+// link), so they can't just be escaped like plain text. Allowlist-sanitize
+// instead: strips <script>/event handlers/etc. but keeps the formatting
+// tags these strings actually use.
+const SANITIZE_OPTS: sanitizeHtml.IOptions = {
+  allowedTags: ['b', 'i', 'em', 'strong', 'span', 'br', 'a'],
+  // class is safe to allow generically — it's a CSS-selector hook, not
+  // something that can carry executable content the way style/on* can.
+  allowedAttributes: { span: ['class', 'style'], a: ['href', 'target', 'rel'] },
+  allowedSchemes: ['http', 'https', 'mailto'],
+};
 
 @Injectable()
 export class TranslationsService implements OnModuleInit {
@@ -29,7 +43,7 @@ export class TranslationsService implements OnModuleInit {
     const site = dto.site || 'vakpon-tours';
     const row = await this.uiStringModel.findOneAndUpdate(
       { site, key: dto.key },
-      { $set: { fr: dto.fr, en: dto.en ?? '' } },
+      { $set: { fr: sanitizeHtml(dto.fr, SANITIZE_OPTS), en: sanitizeHtml(dto.en ?? '', SANITIZE_OPTS) } },
       { upsert: true, new: true },
     );
     await this.auditLogService.log(actor, 'translation.update', dto.key);

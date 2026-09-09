@@ -7,7 +7,7 @@ import { UsersService } from '../users/users.service';
 import { OffersService } from '../offers/offers.service';
 import { MailService } from '../mail/mail.service';
 import { AuditLogService } from '../audit/audit-log.service';
-import { isStaffRole } from '../common/roles';
+import { isStaffRole, RESERVATIONS_MANAGE_ROLES, RESERVATIONS_VIEW_ROLES } from '../common/roles';
 import {
   CreateAuthedReservationDto,
   CreatePublicReservationDto,
@@ -145,7 +145,12 @@ export class ReservationsService {
     const ownerId = (reservation.customer as any)._id
       ? (reservation.customer as any)._id.toString()
       : reservation.customer.toString();
-    if (!isStaffRole(requester.role) && ownerId !== requester.userId) {
+    const isOwner = ownerId === requester.userId;
+    // Staff read access follows the same fine-grained tier as the admin list
+    // endpoint (RESERVATIONS_VIEW_ROLES) — not "any staff account" — so e.g.
+    // a marketing-only account can't pull up a reservation by guessing its id.
+    const staffCanView = (RESERVATIONS_VIEW_ROLES as readonly string[]).includes(requester.role);
+    if (!isOwner && !staffCanView) {
       throw new ForbiddenException("Vous n'avez pas accès à cette réservation");
     }
     return reservation;
@@ -191,6 +196,11 @@ export class ReservationsService {
 
   async addMessage(id: string, requester: { userId: string; role: string }, text: string) {
     const reservation = await this.findOneChecked(id, requester);
+    if (isStaffRole(requester.role) && !(RESERVATIONS_MANAGE_ROLES as readonly string[]).includes(requester.role)) {
+      // View-only staff (e.g. financial) can read a reservation via
+      // findOneChecked above but shouldn't be able to reply as "admin".
+      throw new ForbiddenException("Vous n'avez pas accès à cette action");
+    }
     const from = isStaffRole(requester.role) ? 'admin' : 'customer';
     reservation.messages.push({ from, text, date: new Date() } as any);
     await reservation.save();

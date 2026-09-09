@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Body, Query, UseGuards } from '@nestjs/common';
 import { TranslationsService } from './translations.service';
 import { UpsertUiStringDto } from './dto/upsert-ui-string.dto';
+import { FindTranslationsDto } from './dto/find-translations.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -12,15 +13,18 @@ export class TranslationsController {
   constructor(private translationsService: TranslationsService) {}
 
   // Public — the site fetches this once on load to build its i18n dictionary.
+  // `site` goes through a validated DTO (not a bare @Query() string) so a
+  // MongoDB operator object smuggled in via ?site[$ne]=x is rejected before
+  // it ever reaches the Mongoose filter.
   @Get('translations')
-  findAll(@Query('site') site = 'vakpon-tours') {
+  findAll(@Query() { site = 'vakpon-tours' }: FindTranslationsDto) {
     return this.translationsService.findAll(site);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...OFFERS_ROLES)
   @Get('admin/translations')
-  async findAllForAdmin(@Query('site') site = 'vakpon-tours') {
+  async findAllForAdmin(@Query() { site = 'vakpon-tours' }: FindTranslationsDto) {
     const dict = await this.translationsService.findAll(site);
     return Object.entries(dict)
       .map(([key, v]) => ({ key, ...v }))

@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { AnalyticsService, AnalyticsRange } from './analytics.service';
 import { CollectDto } from './dto/collect.dto';
 import { DurationDto } from './dto/duration.dto';
+import { QueryAnalyticsDto, QueryAnalyticsLogDto } from './dto/query-analytics.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -45,26 +46,14 @@ export class AnalyticsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...ANALYTICS_ROLES)
   @Get('admin/analytics/summary')
-  summary(
-    @Query('site') site = 'vakpon-tours',
-    @Query('range') range: AnalyticsRange = '7d',
-    @Query('path') path?: string,
-    @Query('device') device?: string,
-  ) {
-    return this.analyticsService.summary(site, range, path, device);
+  summary(@Query() { site = 'vakpon-tours', range = '7d', path, device }: QueryAnalyticsDto) {
+    return this.analyticsService.summary(site, range as AnalyticsRange, path, device);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...ANALYTICS_ROLES)
   @Get('admin/analytics/log')
-  log(
-    @Query('site') site = 'vakpon-tours',
-    @Query('range') range: AnalyticsRange = '7d',
-    @Query('path') path?: string,
-    @Query('device') device?: string,
-    @Query('page') page = '1',
-    @Query('limit') limit = '20',
-  ) {
-    return this.analyticsService.log(site, range, path, device, parseInt(page, 10) || 1, Math.min(parseInt(limit, 10) || 20, 100));
+  log(@Query() { site = 'vakpon-tours', range = '7d', path, device, page = 1, limit = 20 }: QueryAnalyticsLogDto) {
+    return this.analyticsService.log(site, range as AnalyticsRange, path, device, page, limit);
   }
 }

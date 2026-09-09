@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -12,6 +13,20 @@ async function bootstrap() {
   // the real visitor IP (via X-Forwarded-For) instead of the proxy's own.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
   app.use(cookieParser());
+  app.use(
+    helmet({
+      // This API only ever returns JSON (plus the analytics.js snippet) — it
+      // never renders an HTML page itself, so a CSP here protects nothing
+      // that the frontend's own CSP (set at the nginx layer) doesn't already
+      // cover. The real value here is the rest of helmet's defaults:
+      // X-Content-Type-Options, frameguard, hidePoweredBy, HSTS, etc.
+      contentSecurityPolicy: false,
+      // Without this, helmet's default Cross-Origin-Resource-Policy
+      // (same-origin) would block the site from loading GET /analytics.js
+      // as a cross-origin <script src>.
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   // Swagger documents the full API surface — keep it out of production.
   if (config.get<string>('NODE_ENV') !== 'production') {

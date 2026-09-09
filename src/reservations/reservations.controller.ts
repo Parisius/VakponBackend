@@ -8,6 +8,7 @@ import {
   UpdateAdminNotesDto,
   UpdateStatusDto,
 } from './dto/reservation.dto';
+import { QueryReservationsDto } from './dto/query-reservations.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -54,7 +55,7 @@ export class ReservationsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...RESERVATIONS_VIEW_ROLES)
   @Get('admin/reservations')
-  findAllForAdmin(@Query('status') status?: string) {
+  findAllForAdmin(@Query() { status }: QueryReservationsDto) {
     return this.reservationsService.findAllForAdmin(status);
   }
 

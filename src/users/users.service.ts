@@ -61,14 +61,19 @@ export class UsersService {
   }
 
   async forgotPassword(email: string) {
+    // Same response either way, and now the same *timing* too: a bcrypt hash
+    // of comparable cost runs on both branches, and the (slower, more
+    // variable) email send is never awaited — so a request for an
+    // unregistered address can no longer be told apart from a registered one
+    // by how long the request takes.
     const user = await this.findByEmail(email);
-    if (!user) return; // silent — don't leak whether an account exists
-
     const tempPassword = generateTempPassword();
     const passwordHash = await bcrypt.hash(tempPassword, 10);
-    await this.userModel.findByIdAndUpdate(user._id, { passwordHash, mustChangePassword: true });
 
-    await this.mailService.sendPasswordReset(user.email, user.fullName, tempPassword);
+    if (!user) return;
+
+    await this.userModel.findByIdAndUpdate(user._id, { passwordHash, mustChangePassword: true });
+    void this.mailService.sendPasswordReset(user.email, user.fullName, tempPassword);
     await this.auditLogService.log(
       { email: user.email, role: user.role },
       'password.forgot',
@@ -232,10 +237,14 @@ export class UsersService {
   listCustomers(search?: string) {
     const filter: any = { role: 'customer' };
     if (search) {
+      // Escape regex metacharacters — `search` reaches here as a plain,
+      // DTO-validated string, but a pattern like `(a+)+$` would still let an
+      // authenticated caller trigger a ReDoS against this query otherwise.
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: escaped, $options: 'i' } },
+        { email: { $regex: escaped, $options: 'i' } },
+        { phone: { $regex: escaped, $options: 'i' } },
       ];
     }
     return this.userModel.find(filter).sort({ createdAt: -1 }).select('-passwordHash');

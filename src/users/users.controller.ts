@@ -16,6 +16,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UpdateProfileDto, UpdateCrmDto, CreateAdminDto, UpdateAdminDto } from './dto/user.dto';
+import { QueryCustomersDto } from './dto/query-customers.dto';
 import { CUSTOMERS_ROLES, TEAM_ROLES } from '../common/roles';
 
 @Controller()
@@ -42,7 +43,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...CUSTOMERS_ROLES)
   @Get('admin/customers')
-  listCustomers(@Query('search') search?: string) {
+  listCustomers(@Query() { search }: QueryCustomersDto) {
     return this.usersService.listCustomers(search);
   }
 
