@@ -51,8 +51,8 @@ services:
       - mongo
     environment:
       ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_BASICAUTH_USERNAME: root
+      ME_CONFIG_BASICAUTH_PASSWORD: )v?PMNiN+eYEb!Q04|9c.t4
     ports:
       - "127.0.0.1:${MONGO_EXPRESS_HOST_PORT:-8091}:8081"
 
