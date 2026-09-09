@@ -40,6 +40,17 @@ export const DEFAULT_UI_STRINGS: { key: string; fr: string; en: string }[] = [
   { key: 'vision.eyebrow', fr: '<span class="accent-word">Notre</span> Vision', en: '<span class="accent-word">Our</span> Vision' },
   { key: 'guide.eyebrow', fr: 'Espace info', en: 'Info hub' },
   { key: 'apropos.eyebrow', fr: 'Notre histoire', en: 'Our story' },
+  { key: 'apropos.introEyebrow', fr: 'Qui sommes-nous', en: 'Who we are' },
+  {
+    key: 'apropos.introHeading',
+    fr: 'Une agence béninoise qui fait découvrir le Bénin autrement.',
+    en: 'A Beninese agency showing Benin like never before.',
+  },
+  {
+    key: 'apropos.introParagraph',
+    fr: "Vakpon Tours est une agence de voyage basée à Cotonou, portée par une équipe locale qui connaît chaque route, chaque marché et chaque histoire du Bénin. Depuis nos débuts, nous concevons des séjours qui vont au-delà des sentiers battus : de la Route des Esclaves à Ouidah aux cités lacustres de Ganvié, en passant par les tata somba du Nord, chaque itinéraire est pensé pour être authentique, sûr et profondément humain. Nous croyons qu'un bon voyage se prépare avec soin et se vit avec des gens qui aiment sincèrement leur pays.",
+    en: "Vakpon Tours is a Cotonou-based travel agency, run by a local team who knows every road, market, and story Benin has to tell. From day one, we've designed trips that go beyond the usual checklist — from the Slave Route in Ouidah to the stilt villages of Ganvié and the Tata Somba homes of the north, every itinerary is built to be authentic, safe, and deeply human. We believe a great trip is planned with care and lived alongside people who genuinely love their country.",
+  },
   { key: 'contactPage.eyebrow', fr: 'Nous contacter', en: 'Get in touch' },
   { key: 'contactPage.title', fr: 'Contactez-nous', en: 'Contact Us' },
   {
