@@ -12,6 +12,7 @@ import { AuditModule } from './audit/audit.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { TranslationsModule } from './translations/translations.module';
 import { PagesModule } from './pages/pages.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PagesModule } from './pages/pages.module';
     AnalyticsModule,
     TranslationsModule,
     PagesModule,
+    ContactModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

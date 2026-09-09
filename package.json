@@ -8,7 +8,9 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "seed:admin": "ts-node src/seed-admin.ts",
-    "seed:admin:compiled": "node dist/seed-admin.js"
+    "seed:admin:compiled": "node dist/seed-admin.js",
+    "reset:pages": "ts-node src/reset-pages-content.ts",
+    "reset:pages:compiled": "node dist/reset-pages-content.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",

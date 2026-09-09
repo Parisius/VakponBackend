@@ -2,6 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
+// fullName/offerTitle/customerName can all originate from customer input
+// (registration, or a free-typed "sur mesure" offer name) — escaped before
+// going into an HTML email so a name like `<img onerror=...>` can't inject
+// markup into what a staff member or another party reads.
+const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function escapeHtml(str: string): string {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => HTML_ESCAPES[c] ?? c);
+}
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -49,9 +58,9 @@ export class MailService {
     await this.send(
       to,
       'Bienvenue chez Vakpon Tours — votre espace client',
-      `<p>Bonjour ${fullName},</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
        <p>Votre espace client Vakpon Tours a été créé pour suivre votre demande de réservation.</p>
-       <p><b>Email :</b> ${to}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
+       <p><b>Email :</b> ${escapeHtml(to)}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
        <p>Merci de vous connecter et de changer ce mot de passe dès que possible.</p>
        ${this.loginButton()}
        <p>— L'équipe Vakpon Tours</p>`,
@@ -62,8 +71,8 @@ export class MailService {
     await this.send(
       to,
       'Votre demande de réservation Vakpon Tours',
-      `<p>Bonjour ${fullName},</p>
-       <p>Nous avons bien reçu votre demande de réservation pour <b>${offerTitle}</b>.</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
+       <p>Nous avons bien reçu votre demande de réservation pour <b>${escapeHtml(offerTitle)}</b>.</p>
        <p>Ceci est une demande sans engagement. Notre équipe vous répondra sous 24 heures avec une confirmation et les modalités de paiement.</p>
        <p>Vous pouvez suivre l'avancement depuis votre espace client à tout moment.</p>
        ${this.loginButton()}
@@ -77,8 +86,8 @@ export class MailService {
       `Nouvelle demande de réservation — ${customerName}`,
       `<p>Nouvelle demande reçue :</p>
        <ul>
-         <li><b>Client :</b> ${customerName}</li>
-         <li><b>Offre :</b> ${offerTitle}</li>
+         <li><b>Client :</b> ${escapeHtml(customerName)}</li>
+         <li><b>Offre :</b> ${escapeHtml(offerTitle)}</li>
          <li><b>ID réservation :</b> ${reservationId}</li>
        </ul>
        <p>Connectez-vous au back-office pour répondre.</p>`,
@@ -97,8 +106,8 @@ export class MailService {
     await this.send(
       to,
       `Mise à jour de votre réservation — ${offerTitle}`,
-      `<p>Bonjour ${fullName},</p>
-       <p>Le statut de votre réservation pour <b>${offerTitle}</b> est maintenant : <b>${labels[status] || status}</b>.</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
+       <p>Le statut de votre réservation pour <b>${escapeHtml(offerTitle)}</b> est maintenant : <b>${labels[status] || status}</b>.</p>
        <p>Consultez votre espace client pour plus de détails.</p>
        ${this.loginButton()}
        <p>— L'équipe Vakpon Tours</p>`,
@@ -109,8 +118,8 @@ export class MailService {
     await this.send(
       to,
       `Nouveau message — réservation ${offerTitle}`,
-      `<p>Bonjour ${fullName},</p>
-       <p>${fromAdmin ? "L'équipe Vakpon Tours" : 'Le client'} a ajouté un message à la réservation <b>${offerTitle}</b>.</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
+       <p>${fromAdmin ? "L'équipe Vakpon Tours" : 'Le client'} a ajouté un message à la réservation <b>${escapeHtml(offerTitle)}</b>.</p>
        <p>Connectez-vous pour le consulter et y répondre.</p>
        ${fromAdmin ? this.loginButton() : ''}`,
     );
@@ -120,9 +129,9 @@ export class MailService {
     await this.send(
       to,
       'Réinitialisation de votre mot de passe — Vakpon Tours',
-      `<p>Bonjour ${fullName},</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
        <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
-       <p><b>Email :</b> ${to}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
+       <p><b>Email :</b> ${escapeHtml(to)}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
        <p>Connectez-vous avec ce mot de passe temporaire — vous serez invité(e) à en choisir un nouveau. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email.</p>
        <p>— L'équipe Vakpon Tours</p>`,
     );
@@ -132,7 +141,7 @@ export class MailService {
     await this.send(
       to,
       `Votre code de connexion : ${code} — Vakpon Tours`,
-      `<p>Bonjour ${fullName},</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
        <p>Voici votre code de vérification pour accéder au back-office Vakpon Tours :</p>
        <p style="font-size:32px;font-weight:bold;letter-spacing:6px;margin:20px 0;">${code}</p>
        <p>Ce code expire dans 10 minutes. Si vous n'êtes pas à l'origine de cette tentative de connexion, changez votre mot de passe dès que possible.</p>
@@ -144,11 +153,25 @@ export class MailService {
     await this.send(
       to,
       'Votre accès au back-office Vakpon Tours',
-      `<p>Bonjour ${fullName},</p>
+      `<p>Bonjour ${escapeHtml(fullName)},</p>
        <p>Un accès au back-office Vakpon Tours a été créé pour vous.</p>
-       <p><b>Email :</b> ${to}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
+       <p><b>Email :</b> ${escapeHtml(to)}<br/><b>Mot de passe temporaire :</b> ${tempPassword}</p>
        <p>Merci de vous connecter et de changer ce mot de passe dès que possible.</p>
        <p>— L'équipe Vakpon Tours</p>`,
+    );
+  }
+
+  async sendContactMessage(adminEmail: string, name: string, email: string, reason: string, message: string) {
+    await this.send(
+      adminEmail,
+      `Nouveau message de contact — ${name}`,
+      `<p>Nouveau message reçu depuis le formulaire de contact du site :</p>
+       <ul>
+         <li><b>Nom :</b> ${escapeHtml(name)}</li>
+         <li><b>Email :</b> ${escapeHtml(email)}</li>
+         <li><b>Motif :</b> ${escapeHtml(reason)}</li>
+       </ul>
+       <p style="white-space:pre-wrap;">${escapeHtml(message)}</p>`,
     );
   }
 }
