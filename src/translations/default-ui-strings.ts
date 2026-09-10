@@ -23,6 +23,7 @@ export const DEFAULT_UI_STRINGS: { key: string; fr: string; en: string }[] = [
   { key: 'a11y.closeModal', fr: 'Fermer', en: 'Close' },
   { key: 'a11y.scrollDown', fr: 'Faites défiler vers le bas', en: 'Scroll down' },
   { key: 'a11y.langSwitch', fr: 'Passer en anglais', en: 'Switch to French' },
+  { key: 'a11y.backToTop', fr: 'Retour en haut', en: 'Back to top' },
 
   // Hero menu label swap
   { key: 'hero.menuOpen', fr: 'MENU', en: 'MENU' },
