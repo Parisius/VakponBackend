@@ -40,7 +40,11 @@ export const DEFAULT_UI_STRINGS: { key: string; fr: string; en: string }[] = [
   { key: 'vision.eyebrow', fr: '<span class="accent-word">Notre</span> Vision', en: '<span class="accent-word">Our</span> Vision' },
   { key: 'guide.eyebrow', fr: 'Espace info', en: 'Info hub' },
   { key: 'apropos.eyebrow', fr: 'Notre histoire', en: 'Our story' },
-  { key: 'apropos.introEyebrow', fr: 'Qui sommes-nous', en: 'Who we are' },
+  {
+    key: 'apropos.introEyebrow',
+    fr: '<span class="accent-word">Qui</span> sommes-nous',
+    en: '<span class="accent-word">Who</span> we are',
+  },
   {
     key: 'apropos.introHeading',
     fr: 'Une agence béninoise qui fait découvrir le Bénin autrement.',
